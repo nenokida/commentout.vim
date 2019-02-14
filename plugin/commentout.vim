@@ -74,36 +74,53 @@ function! commentout#Commentout(count)
   endif  
   if has_key(s:comment_map, &filetype)
     let comment_leader = s:comment_map[&filetype]
-    let i = 0
-    for a in range(cnt)
-      if getline('.') =~ "^\\s*" . comment_leader . " " ||getline('.') =~ "^\\s*" . comment_leader 
-        let i += 1
-        "        i+=1
-      endif
-      execute "normal! j<CR>"
-    endfor
-    execute "normal!" (cnt) . "k"
+    " if one row
+    if cnt == 1
+        if getline('.') =~ "^\\s*" . comment_leader . " " 
+           " Uncomment the line
+           execute "silent s/^\\(\\s*\\)" . comment_leader . " /\\1/"
+       else 
+           if getline('.') =~ "^\\s*" . comment_leader
+               " Uncomment the line
+               execute "silent s/^\\(\\s*\\)" . comment_leader . "/\\1/"
+           else
+               " Comment the line
+               execute "silent s/^\\(\\s*\\)/" . comment_leader . " \\1/"
+           end
+       end
+       " if multi rows
+    elseif 
+      let i = 0
+      for a in range(cnt)
+        if getline('.') =~ "^\\s*" . comment_leader . " " ||getline('.') =~ "^\\s*" . comment_leader 
+          let i += 1
+          "        i+=1
+        endif
+        execute "normal! j<CR>"
+      endfor
+      execute "normal!" (cnt) . "k"
 
-   if i == cnt
-     " Uncomment the line
-     for a in range(cnt)
-       " With space
-       if getline('.') =~ "^\\s*" . comment_leader . " " 
-         execute "silent s/^\\(\\s*\\)" . comment_leader . " /\\1/"
-       elseif getline('.') =~ "^\\s*" . comment_leader
-         execute "silent s/^\\(\\s*\\)" . comment_leader . "/\\1/"
-       endif
-       execute "normal! j<CR>"
-     endfor
-     execute "normal!" (cnt) . "k"
-   else 
-     " Comment the line
-     for a in range(cnt)
-       execute "silent s/^\\(\\s*\\)/" . comment_leader . " \\1/"
-       execute "normal! j<CR>"
-     endfor
-     execute "normal!" (cnt - 0) . "k"
-   endif
+      if i == cnt
+        " Uncomment the line
+        for a in range(cnt)
+          " With space
+          if getline('.') =~ "^\\s*" . comment_leader . " " 
+            execute "silent s/^\\(\\s*\\)" . comment_leader . " /\\1/"
+          elseif getline('.') =~ "^\\s*" . comment_leader
+            execute "silent s/^\\(\\s*\\)" . comment_leader . "/\\1/"
+          endif
+          execute "normal! j<CR>"
+        endfor
+        execute "normal!" (cnt) . "k"
+      else 
+        " Comment the line
+        for a in range(cnt)
+          execute "silent s/^\\(\\s*\\)/" . comment_leader . " \\1/"
+          execute "normal! j<CR>"
+        endfor
+        execute "normal!" (cnt - 0) . "k"
+      endif
+    endif
   else
     echo "No comment leader found for filetype"
   endif
